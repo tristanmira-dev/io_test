@@ -1,50 +1,15 @@
 use std::fs;
 use std::error;
-use std::env;
+
 
 #[cfg(test)]
 mod tests;
 
+pub mod app;
 
-pub struct Config<'u> {
-    file_path: &'u String,
-    search_string: &'u String,
-    is_case_sensitive: bool
-}
+pub mod parser;
 
-impl<'u> Config<'u> {
-    pub fn build(args: &Vec<String>) -> Result<Config, String> {
-
-        if args.len() < 3 {
-          return Err("Insufficient arguments passed".to_string());  
-        }
-
-        let search_string: &String = &args[1];
-    
-        let file_path: &String = &args[2];
-    
-        let is_case_sensitive = env::var("IGNORE_CASE");
-
-        match is_case_sensitive {
-            Ok(_val) => {
-                Ok(Config {
-                    file_path,
-                    search_string,
-                    is_case_sensitive: false
-                })
-            },
-            _=>{
-                Ok(Config {
-                    file_path,
-                    search_string,
-                    is_case_sensitive: true
-                })
-            }
-        }
-
-        
-    }
-}
+pub mod globals;
 
 pub fn search<'a> (query: &str, contents: &'a str) -> Vec<&'a str>{
     let mut vector: Vec<&str> = Vec::new();
@@ -73,7 +38,7 @@ pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<&'a s
     vector
 }
 
-pub fn run(config: Config) -> Result<(), Box<dyn error::Error>> {
+pub fn run(config: app::Config) -> Result<(), Box<dyn error::Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
     let results = if config.is_case_sensitive {
